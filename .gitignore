@@ -1,0 +1,28 @@
+# Python virtual environment
+venv/
+.venv/
+
+# Environment variables
+.env
+
+# Temporary upload folder
+uploads/
+
+# Python cache files
+__pycache__/
+*.pyc
+
+# IDE-specific files
+.idea/
+.vscode/
+
+# macOS-specific files
+.DS_Store
+
+# Temporary files
+*.log
+*.tmp
+
+# Uploaded resume files
+*.pdf
+*.docx
