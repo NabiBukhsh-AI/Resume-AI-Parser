@@ -1,0 +1,50 @@
+# Local development stack. For production, set RESUME_PARSER_API_KEY, put a reverse proxy
+# in front, and move rate limiting to that proxy (the built-in limiter is per-process).
+
+services:
+  api:
+    build:
+      context: .
+      target: runtime
+    image: resume-ai-parser:latest
+    ports:
+      - "8000:8000"
+    environment:
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      RESUME_PARSER_API_KEY: ${RESUME_PARSER_API_KEY:-}
+      RESUME_PARSER_ENVIRONMENT: development
+      RESUME_PARSER_OBSERVABILITY__LOG_LEVEL: INFO
+      # A shared disk cache tier, so restarts do not re-pay for documents already parsed.
+      RESUME_PARSER_CACHE__DIRECTORY: /app/.cache/parses
+    volumes:
+      - parse-cache:/app/.cache
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8000/health/ready"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  ui:
+    build:
+      context: .
+      target: runtime
+      args:
+        EXTRAS: "[ui]"
+    image: resume-ai-parser-ui:latest
+    command: ["resume-parser", "ui", "--port", "8501"]
+    ports:
+      - "8501:8501"
+    environment:
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+    profiles: ["ui"]
+    depends_on:
+      - api
+
+volumes:
+  parse-cache:

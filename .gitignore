@@ -1,28 +1,42 @@
-# Python virtual environment
-venv/
-.venv/
-
-# Environment variables
-.env
-
-# Temporary upload folder
-uploads/
-
-# Python cache files
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.eggs/
 
-# IDE-specific files
-.idea/
-.vscode/
+# Environments
+.venv/
+venv/
+env/
 
-# macOS-specific files
-.DS_Store
+# Secrets - never commit real credentials
+.env
+.env.*
+!.env.example
 
-# Temporary files
+# Tooling caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Runtime artefacts
+.cache/
+parsed/
 *.log
-*.tmp
 
-# Uploaded resume files
+# Candidate documents. Resumes are personal data; keep them out of version control.
 *.pdf
 *.docx
+!tests/fixtures/**/*.pdf
+!tests/fixtures/**/*.docx
+
+# Editors and OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

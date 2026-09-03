@@ -1,0 +1,63 @@
+name: Bug report
+description: Something is not working as documented.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. **Please do not attach a real résumé** — they are personal
+        data. Use a synthetic document, or describe the layout that caused the problem.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What did you expect, and what did you get instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. resume-parser parse example.pdf
+        2. ...
+    validations:
+      required: true
+
+  - type: input
+    id: request-id
+    attributes:
+      label: Request ID
+      description: From the `X-Request-ID` header or the error body, if this came from the API.
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Paste the output of `resume-parser config` and `resume-parser --version`.
+      render: text
+    validations:
+      required: true
+
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Which surface?
+      options: [CLI, HTTP API, Streamlit UI, Library]
+    validations:
+      required: true
+
+  - type: dropdown
+    id: format
+    attributes:
+      label: Document format
+      options: [PDF, DOCX, TXT, Markdown, Not applicable]
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Relevant log output. Check for PII before pasting.
+      render: shell

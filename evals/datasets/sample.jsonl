@@ -1,0 +1,4 @@
+# One JSON object per line. `document` is resolved relative to this file.
+# `expected` holds only the fields you want scored - omit a key to skip that check.
+# Ship your own resumes here; do NOT commit real candidate documents to a public repo.
+{"document": "documents/ada_lovelace.txt", "expected": {"full_name": "Ada Lovelace", "email": "ada@example.com", "location": "London, UK", "companies": ["Analytical Engines", "Difference Engine Co"], "titles": ["Senior Machine Learning Engineer", "Machine Learning Engineer"], "skills": ["Python", "PyTorch", "Kubernetes", "SQL"], "total_years_of_experience": 7.8}}

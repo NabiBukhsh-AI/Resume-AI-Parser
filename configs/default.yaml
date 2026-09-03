@@ -1,0 +1,97 @@
+# Optional configuration layer.
+#
+# Point RESUME_PARSER_CONFIG_FILE at this file to use it. Everything here can also be set
+# through the environment, and environment variables always take precedence - nested keys
+# use a double underscore, so `llm.effort` is `RESUME_PARSER_LLM__EFFORT`.
+#
+# Credentials are deliberately NOT configurable here. They are read from the conventional
+# provider variables (ANTHROPIC_API_KEY, OPENROUTER_API_KEY, OPENAI_API_KEY) so that a
+# secret never ends up in a file that might be committed.
+
+app_name: Resume AI Parser
+environment: development
+
+llm:
+  # Ordered fallback chain. The first entry is tried first; later entries are used only
+  # when the ones before them fail. Entries whose provider has no credentials are skipped
+  # automatically, so you can list several providers and set only the key you have.
+  #
+  # Prices are per million tokens and drive the cost estimate in every response. Leave
+  # them out and the estimate is reported as null rather than as a wrong number.
+  models:
+    - provider: anthropic
+      model: claude-opus-5
+      input_cost_per_mtok: 5.0
+      output_cost_per_mtok: 25.0
+
+    # A cheaper second opinion if the primary is unavailable:
+    # - provider: anthropic
+    #   model: claude-sonnet-5
+    #   input_cost_per_mtok: 2.0
+    #   output_cost_per_mtok: 10.0
+
+    # OpenRouter fronts hundreds of models, including free tiers - handy for local
+    # experimentation. Ask only for models that honour a strict JSON schema.
+    # - provider: openrouter
+    #   model: google/gemini-2.5-flash
+
+    # Any OpenAI-compatible endpoint, including local runtimes:
+    # - provider: openai
+    #   model: gpt-4.1-mini
+
+  # Reasoning depth on models that expose it. Extraction is well specified, so `medium`
+  # is the cost/quality sweet spot; raise it for dense or badly formatted documents.
+  effort: medium
+
+  max_output_tokens: 16000
+  max_input_characters: 200000
+  timeout_seconds: 120
+  max_retries: 3
+  retry_base_delay: 1.0
+
+  # One follow-up call asking the model to fix its own malformed JSON, rather than
+  # failing the request. Cheap, and usually successful.
+  enable_repair_pass: true
+
+cache:
+  # Parsing is a pure function of (bytes, model, prompt version, schema), so the same
+  # document never has to be paid for twice.
+  enabled: true
+  max_entries: 512
+  ttl_seconds: 86400
+  # Set a directory to add a disk tier that survives restarts and can be shared between
+  # workers through a mounted volume.
+  # directory: .cache/parses
+
+extraction:
+  max_file_size: 16777216 # 16 MiB
+  # Below this many characters a document is treated as empty. For PDFs that almost always
+  # means a scan with no text layer, which is reported as needing OCR.
+  min_text_characters: 120
+  allowed_formats:
+    - pdf
+    - docx
+    - txt
+    - md
+
+server:
+  host: 127.0.0.1
+  port: 8000
+  root_path: ""
+  # Exact origins allowed by CORS. An empty list disables CORS entirely.
+  cors_origins: []
+  max_batch_size: 20
+  batch_concurrency: 4
+  # Per-client requests per minute. This limiter is in-process, so the effective ceiling
+  # is this value times the worker count - set it to 0 and use a shared limiter (Redis,
+  # or your ingress) when running more than one instance.
+  rate_limit_per_minute: 60
+  request_timeout_seconds: 180
+
+observability:
+  log_level: INFO
+  # Newline-delimited JSON for log aggregators; human-readable console output otherwise.
+  json_logs: false
+  # Scrub emails, phone numbers and document bodies from log records. Resumes are personal
+  # data - turning this off risks writing PII into log storage.
+  redact_pii: true

@@ -1,0 +1,32 @@
+Ada Lovelace
+ada@example.com | +1 415 555 0142 | London, UK
+github.com/ada | linkedin.com/in/adalovelace
+
+SUMMARY
+Senior machine learning engineer with experience designing, shipping and operating
+production ranking and recommendation systems at scale.
+
+EXPERIENCE
+
+Senior Machine Learning Engineer
+Analytical Engines Ltd, London - Jan 2021 to Present
+- Shipped a ranking model serving 10M requests per day at p99 under 40ms
+- Led the migration of the feature store to a streaming architecture
+- Mentored three engineers through to promotion
+Technologies: Python, PyTorch, Kubernetes, Kafka
+
+Machine Learning Engineer
+Difference Engine Co, Manchester - Mar 2018 to Dec 2020
+- Built the company's first production recommendation pipeline
+- Reduced model training time by 60% by rewriting the data loader
+Technologies: Python, TensorFlow, SQL, Airflow
+
+EDUCATION
+MSc Computer Science, University of London, 2016 - 2018
+Distinction. Thesis on probabilistic programming.
+
+SKILLS
+Python, PyTorch, TensorFlow, Kubernetes, SQL, Airflow, Kafka, AWS
+
+LANGUAGES
+English (native), French (professional working)

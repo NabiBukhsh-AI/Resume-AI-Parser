@@ -1,0 +1,172 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "resume-ai-parser"
+version = "2.0.0"
+description = "Production-grade resume/CV parser and job-matching engine: LLM structured outputs, deterministic analytics, FastAPI + CLI + Streamlit."
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [{ name = "Nabi Bukhsh Baloch", email = "nabibuksh.baloch01@gmail.com" }]
+keywords = [
+    "resume",
+    "resume-parser",
+    "cv",
+    "cv-parser",
+    "ats",
+    "applicant-tracking",
+    "recruiting",
+    "hr-tech",
+    "talent-acquisition",
+    "job-matching",
+    "candidate-screening",
+    "llm",
+    "structured-output",
+    "constrained-decoding",
+    "information-extraction",
+    "nlp",
+    "document-parsing",
+    "pdf-parsing",
+    "docx",
+    "anthropic",
+    "claude",
+    "openrouter",
+    "pydantic",
+    "fastapi",
+    "streamlit",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Environment :: Web Environment",
+    "Framework :: FastAPI",
+    "Framework :: Pydantic :: 2",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Office/Business :: Human Resources",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Text Processing :: Linguistic",
+    "Topic :: Utilities",
+    "Typing :: Typed",
+]
+
+dependencies = [
+    "anthropic>=0.40",
+    "fastapi>=0.115",
+    "httpx>=0.27",
+    "pydantic>=2.9",
+    "pydantic-settings>=2.6",
+    "puremagic>=1.28",
+    "pypdf>=5.1",
+    "python-docx>=1.1",
+    "python-multipart>=0.0.20",
+    "pyyaml>=6.0",
+    "rich>=13.9",
+    "structlog>=24.4",
+    "tenacity>=9.0",
+    "typer>=0.15",
+    "uvicorn[standard]>=0.32",
+]
+
+[project.optional-dependencies]
+ui = ["streamlit>=1.40"]
+dev = [
+    "mypy>=1.13",
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "pytest-cov>=6.0",
+    "respx>=0.21",
+    "ruff>=0.8",
+    "types-pyyaml>=6.0",
+]
+all = ["resume-ai-parser[ui,dev]"]
+
+[project.urls]
+Homepage = "https://github.com/NabiBukhsh-AI/Resume-AI-Parser"
+Repository = "https://github.com/NabiBukhsh-AI/Resume-AI-Parser"
+Documentation = "https://github.com/NabiBukhsh-AI/Resume-AI-Parser#readme"
+Issues = "https://github.com/NabiBukhsh-AI/Resume-AI-Parser/issues"
+Changelog = "https://github.com/NabiBukhsh-AI/Resume-AI-Parser/blob/main/CHANGELOG.md"
+"Release Notes" = "https://github.com/NabiBukhsh-AI/Resume-AI-Parser/releases"
+"Source Code" = "https://github.com/NabiBukhsh-AI/Resume-AI-Parser"
+
+[project.scripts]
+resume-parser = "resume_parser.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/resume_parser"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E", "W",    # pycodestyle
+    "F",         # pyflakes
+    "I",         # isort
+    "N",         # pep8-naming
+    "UP",        # pyupgrade
+    "B",         # flake8-bugbear
+    "C4",        # comprehensions
+    "SIM",       # simplify
+    "TID",       # tidy-imports
+    "RUF",       # ruff-specific
+    "ASYNC",     # async correctness
+    "S",         # bandit
+]
+ignore = [
+    "S101",   # assert is fine in tests
+    "B008",   # FastAPI Depends() in defaults is idiomatic
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S105", "S106", "S311"]
+"evals/**" = ["S101"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_unreachable = true
+plugins = ["pydantic.mypy"]
+mypy_path = "src"
+packages = ["resume_parser"]
+
+# Third-party packages without usable stubs for our target version. numpy arrives via
+# streamlit and ships stubs that require 3.12+ syntax, which aborts a 3.11 analysis -
+# skipping the follow keeps the check running without lowering our own strictness.
+[[tool.mypy.overrides]]
+module = ["puremagic.*", "docx.*", "streamlit.*", "numpy.*", "pandas.*"]
+ignore_missing_imports = true
+follow_imports = "skip"
+
+# Streamlit is untyped, so its decorators erase signatures. Scope the relaxation to
+# the view layer rather than weakening strict mode globally.
+[[tool.mypy.overrides]]
+module = ["resume_parser.ui.*"]
+disallow_untyped_decorators = false
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = "-q --strict-markers --strict-config"
+markers = ["live: hits a real LLM provider; skipped unless credentials are present"]
+
+[tool.coverage.run]
+source = ["src/resume_parser"]
+branch = true
+
+[tool.coverage.report]
+exclude_lines = ["pragma: no cover", "if TYPE_CHECKING:", "raise NotImplementedError"]

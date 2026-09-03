@@ -1,9 +1,0 @@
-fastapi
-uvicorn
-python-multipart
-python-dotenv
-PyYAML
-requests
-markitdown[all]
-python-magic-bin==0.4.14
-streamlit
