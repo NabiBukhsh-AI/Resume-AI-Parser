@@ -52,7 +52,7 @@ classifiers = [
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
-    "Topic :: Office/Business :: Human Resources",
+    "Topic :: Office/Business",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Text Processing :: Linguistic",
@@ -87,6 +87,7 @@ dev = [
     "pytest-cov>=6.0",
     "respx>=0.21",
     "ruff>=0.8",
+    "trove-classifiers>=2025.1.1",
     "types-pyyaml>=6.0",
 ]
 all = ["resume-ai-parser[ui,dev]"]
