@@ -32,6 +32,9 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
+          # Dependencies are declared in pyproject.toml; without this the default
+          # glob matches nothing and the cache key never changes.
+          cache-dependency-glob: "pyproject.toml"
 
       - name: Set up Python
         run: uv python install 3.13
@@ -70,6 +73,9 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
+          # Dependencies are declared in pyproject.toml; without this the default
+          # glob matches nothing and the cache key never changes.
+          cache-dependency-glob: "pyproject.toml"
 
       - name: Set up Python
         run: uv python install ${{ matrix.python-version }}
