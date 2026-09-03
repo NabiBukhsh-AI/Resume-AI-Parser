@@ -27,6 +27,18 @@ class ResumeParserError(Exception):
 # --------------------------------------------------------------------------- input
 
 
+class BadRequestError(ResumeParserError):
+    """The caller sent something the service will not act on.
+
+    Distinct from the base class on purpose: raising ``ResumeParserError`` directly gives
+    a 500, which blames us for the caller's mistake and hides the real problem behind a
+    generic message.
+    """
+
+    status_code = 400
+    code = "bad_request"
+
+
 class InvalidDocumentError(ResumeParserError):
     """The uploaded bytes are not a document we can read."""
 

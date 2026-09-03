@@ -55,9 +55,7 @@ class MatchRequest(_Base):
     worth doing when the same posting is scored against many candidates.
     """
 
-    resume: ParseResult | None = Field(
-        default=None, description="A previous /v1/parse response, passed back verbatim."
-    )
+    resume: ParseResult = Field(description="A previous /v1/parse response, passed back verbatim.")
     requirements: JobRequirements | None = Field(
         default=None, description="Structured requirements. Takes precedence over job text."
     )

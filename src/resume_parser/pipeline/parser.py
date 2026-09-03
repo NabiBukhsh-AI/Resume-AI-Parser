@@ -114,6 +114,7 @@ class ResumeParsingService:
             model_label=chain[0].label,
             prompt_version=PROMPT_VERSION,
             schema_fingerprint=self._resume_schema_id,
+            input_character_limit=self._settings.llm.max_input_characters,
         )
 
         if cached := await self._cache.get(cache_key):

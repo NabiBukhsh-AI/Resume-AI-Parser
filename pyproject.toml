@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "resume-ai-parser"
-version = "2.0.0"
+version = "2.0.1"
 description = "Production-grade resume/CV parser and job-matching engine: LLM structured outputs, deterministic analytics, FastAPI + CLI + Streamlit."
 readme = "README.md"
 requires-python = ">=3.12"

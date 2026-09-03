@@ -4,6 +4,24 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.1] - 2026-09-04
+
+### Fixed
+
+- **Client mistakes no longer return 500.** An oversized batch and a `/v1/match` request
+  without a `resume` were both raised as a bare `ResumeParserError`, whose default status is
+  500 - blaming the server for the caller's error and hiding the real problem. Added
+  `BadRequestError` (400) for the batch limit, and made `MatchRequest.resume` required so a
+  missing résumé is rejected as a 422 before the handler runs.
+- **Stale cache entries after a config change.** The cache key omitted
+  `llm.max_input_characters`, which decides where a long résumé is truncated and therefore
+  which sections the model ever saw. Changing that limit now invalidates affected entries.
+
+### Changed
+
+- README rewritten with the full architecture, module breakdown, request lifecycle, complete
+  configuration reference, error table and extension guide.
+
 ## [2.0.0] - 2026-09-03
 
 A complete rewrite. Version 1.x did not run: `api.py` and `ui_components.py` both imported a
@@ -32,7 +50,7 @@ A complete rewrite. Version 1.x did not run: `api.py` and `ui_components.py` bot
 - **`GET /v1/schema`** publishing the exact JSON Schema the model is constrained to.
 - **Richer domain model** — certifications, projects, languages, awards, publications,
   per-role highlights and technologies, employment type, and web presence links.
-- **207 tests**, `mypy --strict`, Ruff, multi-platform CI, a multi-stage Dockerfile, and an
+- **217 tests**, `mypy --strict`, Ruff, multi-platform CI, a multi-stage Dockerfile, and an
   evaluation harness with regression detection.
 
 ### Changed

@@ -34,14 +34,25 @@ def build_cache_key(
     model_label: str,
     prompt_version: str,
     schema_fingerprint: str,
+    input_character_limit: int,
 ) -> str:
     """Derive the cache key for one parse.
 
-    Every input that can change the output is folded in, so bumping a prompt or editing
-    the schema invalidates the affected entries automatically instead of serving results
-    that silently predate the change.
+    Every input that can change the output is folded in, so bumping a prompt, editing the
+    schema, switching models or changing how much of the document is sent invalidates the
+    affected entries automatically instead of serving results that silently predate the
+    change. ``input_character_limit`` matters because it decides where a long resume is
+    truncated, and therefore which sections the model ever saw.
     """
-    material = "|".join((content_sha256, model_label, prompt_version, schema_fingerprint))
+    material = "|".join(
+        (
+            content_sha256,
+            model_label,
+            prompt_version,
+            schema_fingerprint,
+            str(input_character_limit),
+        )
+    )
     return hashlib.sha256(material.encode("utf-8")).hexdigest()
 
 

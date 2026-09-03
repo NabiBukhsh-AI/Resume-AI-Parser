@@ -18,7 +18,7 @@ from resume_parser.api.schemas import (
     MatchResponse,
 )
 from resume_parser.domain.results import ParseResult
-from resume_parser.exceptions import ResumeParserError
+from resume_parser.exceptions import BadRequestError
 from resume_parser.pipeline.parser import BatchItem
 
 __all__ = ["router"]
@@ -84,11 +84,11 @@ async def parse_batch(
     Individual failures are reported per document rather than failing the whole request,
     so one corrupt file in a bulk import does not discard the rest.
     """
-    from resume_parser.exceptions import ResumeParserError as _Error
-
     if len(files) > settings.server.max_batch_size:
-        raise _Error(
+        raise BadRequestError(
             f"Batch size {len(files)} exceeds the limit of {settings.server.max_batch_size}.",
+            submitted=len(files),
+            limit=settings.server.max_batch_size,
         )
 
     items = [
@@ -139,10 +139,6 @@ async def match(service: ParsingService, payload: MatchRequest) -> MatchResponse
     Pass ``requirements`` to score for free; pass ``job_description`` to have the posting
     structured first with a single, cheap LLM call.
     """
-    if payload.resume is None:
-        raise ResumeParserError(
-            "A 'resume' from a previous /v1/parse response is required.",
-        )
     requirements = payload.requirements
     if requirements is None:
         requirements = await service.extract_job_requirements(payload.job_description or "")

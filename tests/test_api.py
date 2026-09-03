@@ -193,6 +193,32 @@ class TestBatchEndpoint:
         assert failed["error_code"] == "empty_document"
 
 
+class TestBatchLimits:
+    async def test_oversized_batch_is_a_client_error(
+        self,
+        api_settings: Settings,
+        sample_resume_payload: dict[str, Any],
+        text_resume_bytes: bytes,
+    ) -> None:
+        """Too many files is a 400, not a 500 - the caller can fix it."""
+        api_settings.server.max_batch_size = 2
+        app = _build_app(api_settings, StubProvider([sample_resume_payload] * 5))
+        transport = httpx.ASGITransport(app=app)
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as http:
+            response = await http.post(
+                "/v1/parse/batch",
+                files=[
+                    ("files", (f"{index}.txt", text_resume_bytes, "text/plain"))
+                    for index in range(3)
+                ],
+            )
+        assert response.status_code == 400
+        body = response.json()
+        assert body["code"] == "bad_request"
+        assert body["submitted"] == 3
+        assert body["limit"] == 2
+
+
 class TestMatchEndpoint:
     async def test_scoring_a_parsed_resume(
         self, client: httpx.AsyncClient, text_resume_bytes: bytes
@@ -218,9 +244,25 @@ class TestMatchEndpoint:
         assert body["match"]["score"] > 0
         assert body["match"]["rationale"]
 
-    async def test_request_without_a_job_is_rejected(self, client: httpx.AsyncClient) -> None:
-        response = await client.post("/v1/match", json={"resume": None})
+    async def test_request_without_a_job_is_rejected(
+        self, client: httpx.AsyncClient, text_resume_bytes: bytes
+    ) -> None:
+        parsed = (
+            await client.post(
+                "/v1/parse", files={"file": ("ada.txt", text_resume_bytes, "text/plain")}
+            )
+        ).json()
+        response = await client.post("/v1/match", json={"resume": parsed})
         assert response.status_code == 422
+        assert response.json()["code"] == "validation_error"
+
+    async def test_request_without_a_resume_is_422_not_500(self, client: httpx.AsyncClient) -> None:
+        """A missing resume is the caller's mistake, so it must not read as a server fault."""
+        response = await client.post(
+            "/v1/match", json={"requirements": {"required_skills": ["Python"]}}
+        )
+        assert response.status_code == 422
+        assert response.json()["code"] == "validation_error"
 
 
 class TestAuthentication:

@@ -195,12 +195,34 @@ class TestParseCache:
         assert await ParseCache(config).get("k") == {"a": 1}
 
     def test_key_changes_with_every_input(self) -> None:
-        base = {
+        base: dict[str, Any] = {
             "content_sha256": "abc",
             "model_label": "anthropic:claude-opus-5",
             "prompt_version": "2.0.0",
             "schema_fingerprint": "deadbeef",
+            "input_character_limit": 200_000,
         }
         baseline = build_cache_key(**base)
-        for field in base:
-            assert build_cache_key(**{**base, field: "changed"}) != baseline
+        for field, value in base.items():
+            changed = value + 1 if isinstance(value, int) else "changed"
+            assert build_cache_key(**{**base, field: changed}) != baseline, field
+
+    async def test_changing_the_input_budget_invalidates_the_cache(
+        self, settings: Settings, sample_resume_payload: dict[str, Any], text_resume_bytes: bytes
+    ) -> None:
+        """A different truncation point means the model saw a different document."""
+        settings.cache = CacheSettings(enabled=True)
+        provider = StubProvider([sample_resume_payload, sample_resume_payload])
+        service = ResumeParsingService(
+            settings, llm=LLMClient(settings, providers={"anthropic": provider})
+        )
+        await service.parse(text_resume_bytes)
+
+        settings.llm.max_input_characters = 1_000
+        rebuilt = ResumeParsingService(
+            settings,
+            llm=LLMClient(settings, providers={"anthropic": provider}),
+            cache=service.cache,
+        )
+        await rebuilt.parse(text_resume_bytes)
+        assert len(provider.calls) == 2
